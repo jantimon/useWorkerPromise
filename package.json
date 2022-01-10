@@ -1,13 +1,15 @@
 {
   "name": "use-worker-promise",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "A tiny and performant react hook for communicating with Web Workers",
+  "keywords": ["web worker", "react", "hooks"],
   "main": "index.mjs",
   "module": "index.mjs",
   "exports": {
     ".": "./index.mjs",
     "./register": "./register/index.mjs"
   },
+  "sideEffects": false,
   "scripts": {
     "build": "tsc",
     "prettier": "npx prettier src/*.mts --write"
@@ -18,7 +20,6 @@
     "register/index.mjs",
     "register/index.d.mts"
   ],
-  "keywords": [],
   "author": "Jan Nicklas",
   "license": "MIT",
   "dependencies": {
