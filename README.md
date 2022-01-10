@@ -45,7 +45,7 @@ The only dependency is the very lightweight [promise-worker](https://www.npmjs.c
 
 worker.ts
 ```tsx
-import { expose } from 'use-worker-promise/register.mjs';
+import { expose } from 'use-worker-promise/register';
 
 const worker = async (message: string) => {
   return message.toUpperCase();
