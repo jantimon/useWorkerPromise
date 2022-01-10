@@ -65,13 +65,13 @@ const workerLoader = createWorkerFactory<WorkerFunction>(
     () => new Worker(new URL('./worker.ts', import.meta.url))
 );
 
-export const App = (input: string) => {
+export const App = () => {
     const executeWorker = useWorkerPromise(workerLoader);
 
     return <button onClick={async () => {
         // This promise will be canceled on unmount automatically because of the worker termination:
         const result = await executeWorker("foo");
-        console.log(result);
+        console.log(result); // logs: "FOO"
     }}>
         run WebWorker
     </button>

@@ -1,6 +1,6 @@
 {
   "name": "use-worker-promise",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A tiny and performant react hook for communicating with Web Workers",
   "main": "index.mjs",
   "module": "index.mjs",
