@@ -21,8 +21,14 @@
     "min:useWorkerMemo": "npx terser --compress --mangle --toplevel useWorkerMemo.mjs"
   },
   "files": [
-    "index.mjs",
-    "index.d.mts",
+    "createWorkerFactory.d.mts",
+    "createWorkerFactory.mjs ",
+    "index.d.mts ",
+    "index.mjs ",
+    "useWorkerMemo.d.mts ",
+    "useWorkerMemo.mjs ",
+    "useWorkerPromise.d.mts ",
+    "useWorkerPromise.mjs ",
     "register/index.mjs",
     "register/index.d.mts"
   ],
