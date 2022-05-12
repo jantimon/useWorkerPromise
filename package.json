@@ -1,6 +1,6 @@
 {
   "name": "use-worker-promise",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "A tiny and performant react hook for communicating with Web Workers",
   "keywords": [
     "web worker",
@@ -34,6 +34,11 @@
   ],
   "author": "Jan Nicklas",
   "license": "MIT",
+  "homepage": "https://github.com/jantimon/useWorkerPromise#readme",
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/jantimon/useWorkerPromise.git"
+  },
   "dependencies": {
     "promise-worker": "^2.0.1"
   },
