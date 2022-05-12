@@ -1,8 +1,12 @@
 {
   "name": "use-worker-promise",
-  "version": "1.0.6",
+  "version": "1.1.0",
   "description": "A tiny and performant react hook for communicating with Web Workers",
-  "keywords": ["web worker", "react", "hooks"],
+  "keywords": [
+    "web worker",
+    "react",
+    "hooks"
+  ],
   "main": "index.mjs",
   "module": "index.mjs",
   "exports": {
@@ -12,7 +16,9 @@
   "sideEffects": false,
   "scripts": {
     "build": "tsc",
-    "prettier": "npx prettier src/*.mts --write"
+    "prettier": "npx prettier src/*.mts --write",
+    "min:useWorkerPromise": "npx terser --compress --mangle --toplevel useWorkerPromise.mjs",
+    "min:useWorkerMemo": "npx terser --compress --mangle --toplevel useWorkerMemo.mjs"
   },
   "files": [
     "index.mjs",
@@ -26,8 +32,9 @@
     "promise-worker": "^2.0.1"
   },
   "devDependencies": {
-    "@types/react": "^17.0.38",
-    "react": "^17.0.2",
+    "@types/react": "18.0.9",
+    "react": "18.1.0",
+    "terser": "^5.13.1",
     "typescript": "^4.5.4"
   }
 }

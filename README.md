@@ -9,6 +9,7 @@ A tiny and performant react hook for communicating with Web Workers. Post a mess
  - typesafe worker code
  - easy to use
  - support for ssr
+ - support for concurrency mode
 
 ## Installation
 
@@ -24,22 +25,28 @@ yarn add useWorkerPromise
 
 ## Zero Config
 
-Modern bundlers are capable of bundling Workers [out of the box](https://webpack.js.org/guides/web-workers/).  
-Therefore `useWorkerPromise` requires **no plugin or loader**.
+Modern bundlers (Webpack, Vite, Parcel, ...) are capable of bundling Workers [out of the box](https://webpack.js.org/guides/web-workers/).  
+Therefore `useWorkerPromise` and `useWorkerMemo` require **no plugin or loader**.
 
 ## Size
 
-The `useWorkerPromise` hook itself minifies to less than 200byte: 
+The `useWorkerPromise` hook itself minifies to ~300byte: 
 
+```js
+function useWorkerPromise(n){const s=()=>n&&(t=>((t,r)=>{const n=o.get(t);if(n)return n;const s=r(),i=new e(s),c=[s,i.postMessage.bind(i)];return o.set(t,c),c})(i,n)[1](t)),[i,c]=r(s);return t((()=>c(s)),[n]),t((()=>()=>(e=>{const t=o.get(e);o.delete(e),t&&t[0].terminate()})(i)),[i]),i}
 ```
-function(t){const e=t?()=>{const e=t(),n=new x(e);return{t:()=>e.terminate(),w:t=>n.postMessage(t)}}:{w:t},[{t:n,w:o},r]=y(e);return z(()=>(!n!=!t&&r(e),n),[t]),o}
+
+The `useWorkerMemo` hook itself minifies to ~300byte: 
+
+```js
+function useWorkerMemo(n,s){const[i,m]=t(),[p]=t({p:Promise.resolve(o)});return e((()=>{if(!n)return;const e=n();return p.r||(p.r=new r(e)),()=>{p.r=void 0,e.terminate()}}),[n]),e((()=>{const{r:r}=p;let e=!0;if(r)return p.p=p.p.then((t=>e?t!==o&&m(t)||r.postMessage(s).then((r=>e&&m(r)||r)):t)),()=>{e=!1}}),[s]),i}
 ```
 
 The only dependency is the very lightweight [promise-worker](https://www.npmjs.com/package/promise-worker) package.
 
 ## Types
 
-`useWorkerPromise` is fully typed and provides helpers to keep your worker typings in sync with your react application.
+`useWorkerPromise` and `useWorkerMemo` are fully typed and provides helpers to keep your worker typings in sync with your react application.
 
 ## Example
 
@@ -47,25 +54,21 @@ worker.ts
 ```tsx
 import { expose } from 'use-worker-promise/register';
 
-const worker = async (message: string) => {
+export const worker = expose(async (message: string) => {
   return message.toUpperCase();
-};
-
-export type WorkerFunction = typeof worker;
-expose(worker);
+});
 ```
 
-App.tsx
+UseWorkerPromiseDemo.tsx
 ```tsx
 import { useEffect, useState } from "react"
 import { createWorkerFactory, useWorkerPromise } from "use-worker-promise";
 
-import type {WorkerFunction} from ("./worker");
-const workerLoader = createWorkerFactory<WorkerFunction>(
-    () => new Worker(new URL('./worker.ts', import.meta.url))
+const workerLoader = createWorkerFactory<import('./worker').worker>(
+  () => new Worker(new URL('./worker.ts', import.meta.url), { type: "module" })
 );
 
-export const App = () => {
+export const UseWorkerPromiseDemo = () => {
     const executeWorker = useWorkerPromise(workerLoader);
 
     return <button onClick={async () => {
@@ -78,17 +81,42 @@ export const App = () => {
 }
 ```
 
+UseWorkerMemoDemo.tsx
+```tsx
+import { useEffect, useState } from "react"
+import { createWorkerFactory, useWorkerMemo } from "use-worker-promise";
+
+const workerLoader = createWorkerFactory<import('./worker').worker>(
+  () => new Worker(new URL('./worker.ts', import.meta.url), { type: "module" })
+);
+
+export const UseWorkerMemoDemo = () => {
+  const [value, setValue] = useState("");
+  const workerResult = useWorkerMemo(workerLoader, value);
+  return (
+    <>
+      <input
+        type="text"
+        value={value}
+        onChange={({ target }) => setValue(target.value)}
+      />
+      {workerResult}
+    </>
+  );
+}
+```
+
 ## SSR
 
-`useWorkerPromise` supports SSR in two different ways: hybrid and only browser.
+`useWorkerPromise` and `useWorkerMemo` support SSR in two different ways: `hybrid` and `browser only`.
 
 ### Run the worker in NodeJs
 
-For SSR you can use the [web-worker](https://www.npmjs.com/package/web-worker) npm package.
+For SSR you can add the [web-worker](https://www.npmjs.com/package/web-worker) npm package.
 
 ### Run the worker only in Browser
 
-`useWorkerPromise` allows to conditionally execture the WebWorker by returning a falsy workerLoader:
+`createWorkerFactory` allows to conditionally execture the WebWorker by returning a falsy workerLoader:
 
 ```tsx
 const workerLoader = typeof window !== "undefined" && 
