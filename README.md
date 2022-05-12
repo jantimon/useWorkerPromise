@@ -50,6 +50,8 @@ The only dependency is the very lightweight [promise-worker](https://www.npmjs.c
 
 ## Example
 
+Try it live on [Glitch](https://glitch.com/edit/#!/zinc-acute-train)
+
 worker.ts
 ```tsx
 import { expose } from 'use-worker-promise/register';
