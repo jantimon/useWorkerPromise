@@ -30,14 +30,14 @@ Therefore `useWorkerPromise` and `useWorkerMemo` require **no plugin or loader**
 
 ## Size
 
-The `useWorkerPromise` hook minifies to ~270byte (min+gzip): 
+The `useWorkerPromise` hook minifies to [~300byte (min+gzip)](https://bundlejs.com/?q=use-worker-promise&treeshake=[{useWorkerPromise}]&config={%22esbuild%22:{%22external%22:[%22react%22,%22react-dom%22,%22promise-worker%22]}}): 
 
 ```js
 const o=new WeakMap;
 function useWorkerPromise(n){const s=()=>n&&(t=>((t,r)=>{const n=o.get(t);if(n)return n;const s=r(),i=new e(s),c=[s,i.postMessage.bind(i)];return o.set(t,c),c})(i,n)[1](t)),[i,c]=r(s);return t((()=>c(s)),[n]),t((()=>()=>(e=>{const t=o.get(e);o.delete(e),t&&t[0].terminate()})(i)),[i]),i}
 ```
 
-The `useWorkerMemo` hook minifies to ~300byte (min+gzip): 
+The `useWorkerMemo` hook minifies to [~300byte (min+gzip)](https://bundlejs.com/?q=use-worker-promise&treeshake=[{useWorkerMemo}]&config={%22esbuild%22:{%22external%22:[%22react%22,%22react-dom%22,%22promise-worker%22]}}):
 
 ```js
 const o={},n=Promise.resolve(o);

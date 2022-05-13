@@ -33,14 +33,56 @@ type UnwrapWorkerFunctionResult<TWorker extends any> = UnwrapWorkerFunctionLoade
  *  }
  * ```
  */
+ export function useWorkerMemo<
+ TArg extends any,
+ TWorkerFunctionLoader extends
+ | WorkerFunctionLoader<SingleArgmumentFunction<TArg, any>>
+ | false
+ | null
+ | undefined
+>(workerLoader: TWorkerFunctionLoader, input: TArg): undefined | UnwrapWorkerFunctionResult<TWorkerFunctionLoader>
+/**
+ * useWorkerMemo uses a worker to computate a value and memorizes it
+ *
+ * If the worker argument is undefined / null the hook will wait for a valid loader
+ * 
+ * The init argument will be passed to initialize the worker
+ *
+ * @example
+ * ```tsx
+ *  const workerLoader = createWorkerFactory<import("./worker").MyWorker>(
+ *    () => new Worker(new URL('./worker.ts', import.meta.url))
+ *  );
+ *
+ *  // The worker will be called with the given payload initialy
+ *  const workerConfig = { foo: 'baz' };
+ *  
+ *  const MyComponent = () => {
+ *    const calculatedValue = useWorkerMemo(workerLoader, 42, workerConfig);
+ *    return (
+ *      <span>{calculatedValue}</span>
+ *    );
+ *  }
+ * ```
+ */
 export function useWorkerMemo<
   TArg extends any,
+  TInit extends any,
   TWorkerFunctionLoader extends
-  | WorkerFunctionLoader<SingleArgmumentFunction<TArg, any>>
+  | WorkerFunctionLoader<SingleArgmumentFunction<TArg | TInit, any>>
   | false
   | null
   | undefined
->(workerLoader: TWorkerFunctionLoader, input: TArg, init?: TArg): undefined | UnwrapWorkerFunctionResult<TWorkerFunctionLoader> {
+>(workerLoader: TWorkerFunctionLoader, input: TArg, init: TInit): undefined | UnwrapWorkerFunctionResult<TWorkerFunctionLoader>
+export function useWorkerMemo<
+  TArg extends any,
+  TInit extends any,
+  TWorkerFunctionLoader extends
+  | WorkerFunctionLoader<SingleArgmumentFunction<TArg | TInit, any>>
+  | false
+  | null
+  | undefined
+>(workerLoader: TWorkerFunctionLoader, input: TArg, init?: TInit): undefined | UnwrapWorkerFunctionResult<TWorkerFunctionLoader> {
   type Runner = UnwrapWorkerFunctionLoader<TWorkerFunctionLoader>;
   const [result, setResult] =
     useState<
