@@ -14,13 +14,13 @@ A tiny and performant react hook for communicating with Web Workers. Post a mess
 ## Installation
 
 ```
-npm install useWorkerPromise
+npm install use-worker-promise
 ```
 
 or
 
 ```
-yarn add useWorkerPromise
+yarn add use-worker-promise
 ```
 
 ## Zero Config
@@ -30,16 +30,18 @@ Therefore `useWorkerPromise` and `useWorkerMemo` require **no plugin or loader**
 
 ## Size
 
-The `useWorkerPromise` hook itself minifies to ~300byte: 
+The `useWorkerPromise` hook minifies to ~270byte (min+gzip): 
 
 ```js
+const o=new WeakMap;
 function useWorkerPromise(n){const s=()=>n&&(t=>((t,r)=>{const n=o.get(t);if(n)return n;const s=r(),i=new e(s),c=[s,i.postMessage.bind(i)];return o.set(t,c),c})(i,n)[1](t)),[i,c]=r(s);return t((()=>c(s)),[n]),t((()=>()=>(e=>{const t=o.get(e);o.delete(e),t&&t[0].terminate()})(i)),[i]),i}
 ```
 
-The `useWorkerMemo` hook itself minifies to ~300byte: 
+The `useWorkerMemo` hook minifies to ~300byte (min+gzip): 
 
 ```js
-function useWorkerMemo(n,s){const[i,m]=t(),[p]=t({p:Promise.resolve(o)});return e((()=>{if(!n)return;const e=n();return p.r||(p.r=new r(e)),()=>{p.r=void 0,e.terminate()}}),[n]),e((()=>{const{r:r}=p;let e=!0;if(r)return p.p=p.p.then((t=>e?t!==o&&m(t)||r.postMessage(s).then((r=>e&&m(r)||r)):t)),()=>{e=!1}}),[s]),i}
+const o={},n=Promise.resolve(o);
+function useWorkerMemo(s,i,p){const[m,c]=t(),[u]=t({p:n});return e((()=>{if(!s)return;const e=s(),t=new r(e);return u.r||(u.r=t.postMessage.bind(t)),u.p=n.then((()=>p&&u.r?u.r(p):o)),()=>{u.p=n,u.r=void 0,e.terminate()}}),[s,p]),e((()=>{const{r:r}=u;let e=!0;if(r)return u.p=u.p.then((r=>e&&u.r?r!==o&&c(r)||u.r(i).then((r=>e&&c(r)||r)):r)),()=>{e=!1}}),[i]),m}
 ```
 
 The only dependency is the very lightweight [promise-worker](https://www.npmjs.com/package/promise-worker) package.

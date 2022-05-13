@@ -5,10 +5,14 @@ import type {
   WorkerFunctionLoader,
 } from "./createWorkerFactory.mjs";
 
+/** Unique NoValue Symbol */
 const NO_VALUE = {};
+const NOOP_PROMISE = Promise.resolve(NO_VALUE);
 
 type UnwrapWorkerFunctionLoader<TWorker extends any> =
   TWorker extends WorkerFunctionLoader<infer U> ? U : TWorker;
+
+type UnwrapWorkerFunctionResult<TWorker extends any> = UnwrapWorkerFunctionLoader<TWorker> extends SingleArgmumentFunction<any, infer TResult> ? TResult : TWorker;
 
 /**
  * useWorkerMemo uses a worker to computate a value and memorizes it
@@ -36,44 +40,46 @@ export function useWorkerMemo<
   | false
   | null
   | undefined
->(workerLoader: TWorkerFunctionLoader, input: TArg) {
+>(workerLoader: TWorkerFunctionLoader, input: TArg, init?: TArg): undefined | UnwrapWorkerFunctionResult<TWorkerFunctionLoader> {
   type Runner = UnwrapWorkerFunctionLoader<TWorkerFunctionLoader>;
   const [result, setResult] =
     useState<
-      Runner extends SingleArgmumentFunction<TArg, infer TResult>
-      ? TResult
-      : Runner
+      undefined | UnwrapWorkerFunctionResult<TWorkerFunctionLoader>
     >();
-  const [ref] = useState<{ p: Promise<any>, r?: PromiseWorker }>({ p: Promise.resolve(NO_VALUE) });
+  const [ref] = useState<{ p: Promise<any>, r?: Runner }>({ p: NOOP_PROMISE });
   // Start and stop the worker:
   useEffect(() => {
     if (!workerLoader) return;
     const worker = workerLoader();
-    ref.r ||= new PromiseWorker(worker);
+    const promiseWorker = new PromiseWorker(worker);
+    ref.r ||= promiseWorker.postMessage.bind(promiseWorker) as Runner;
+    // Initialize the worker if the optional initialize arg was passed
+    ref.p = NOOP_PROMISE.then(() => init && ref.r ? ref.r(init) : NO_VALUE);
     return () => {
+      ref.p = NOOP_PROMISE;
       ref.r = undefined;
       worker.terminate();
     };
-  }, [workerLoader]);
+  }, [workerLoader, init]);
   // Run the worker
   useEffect(() => {
     const { r: promiseWorker } = ref;
     let isActive = true;
     if (!promiseWorker) return;
-    // A worker is single threaded
-    // to save time 
-    // Wait for the previous worker computation
+    // A worker is single threaded and takes time to boot up
+    // this queue will throttle the input values to ensure that
+    // only the latest input is send to the worker
     ref.p = ref.p.then((previousResult): any =>
-      // Verify that the component is still mounted
-      // Verify that the value hasn't changed
-      (!isActive ? previousResult :
+    // Verify that the component is still mounted
+    // Verify that the value hasn't changed
+    (!isActive || !ref.r ? previousResult :
       // Set the previous result while calculating the next value
       (previousResult !== NO_VALUE && setResult(previousResult)) ||
       // Start computation
-      promiseWorker.postMessage(input).then((result) => 
-      // Verify that the component is still mounted
-      (isActive &&
-        setResult(result)) || result
+      ref.r(input).then((result) =>
+        // Verify that the component is still mounted
+        (isActive &&
+          setResult(result)) || result
       )));
     return () => {
       isActive = false;

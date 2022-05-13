@@ -1,6 +1,6 @@
 {
   "name": "use-worker-promise",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "A tiny and performant react hook for communicating with Web Workers",
   "keywords": [
     "web worker",
@@ -10,15 +10,21 @@
   "main": "index.mjs",
   "module": "index.mjs",
   "exports": {
-    ".": "./index.mjs",
+    ".": {
+      "import": "./index.mjs"
+    },
     "./register": "./register/index.mjs"
   },
   "sideEffects": false,
   "scripts": {
     "build": "tsc",
     "prettier": "npx prettier src/*.mts --write",
+    "min": "npm run useWorkerPromise && npm run min:useWorkerMemo",
     "min:useWorkerPromise": "npx terser --compress --mangle --toplevel useWorkerPromise.mjs",
-    "min:useWorkerMemo": "npx terser --compress --mangle --toplevel useWorkerMemo.mjs"
+    "min:useWorkerMemo": "npx terser --compress --mangle --toplevel useWorkerMemo.mjs",
+    "size": "npm run size:useWorkerPromise && npm run size:useWorkerMemo",
+    "size:useWorkerPromise": "npx terser --compress --mangle --toplevel useWorkerPromise.mjs | npx gzip-size",
+    "size:useWorkerMemo": "npx terser --compress --mangle --toplevel useWorkerMemo.mjs | npx gzip-size"
   },
   "files": [
     "createWorkerFactory.d.mts",
@@ -36,14 +42,15 @@
   "license": "MIT",
   "homepage": "https://github.com/jantimon/useWorkerPromise#readme",
   "repository": {
-    "type" : "git",
-    "url" : "https://github.com/jantimon/useWorkerPromise.git"
+    "type": "git",
+    "url": "https://github.com/jantimon/useWorkerPromise.git"
   },
   "dependencies": {
     "promise-worker": "^2.0.1"
   },
   "devDependencies": {
     "@types/react": "18.0.9",
+    "gzip-size-cli": "^5.1.0",
     "react": "18.1.0",
     "terser": "^5.13.1",
     "typescript": "^4.5.4"

@@ -6,7 +6,32 @@
     <title>Parcel App</title>
   </head>
   <body>
-    <div id="root"></div>
+    <main id="root"></main>
+    <style>
+      html, body {
+        height: 100%;
+      }
+      body {
+        display: flex;
+      }
+      h1 { margin-top: 0 }
+      label {
+        display: flex;
+        margin-bottom: 10px;
+      }
+      label input {
+        width: 50%;
+        display: block;
+        margin-left: auto;
+      }
+      main {
+        font-family: Arial, Helvetica, sans-serif;
+        padding: 10px 20px;
+        margin: auto;
+        max-width: 400px;
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+      }
+    </style>
     <script type="module" src="./main.tsx"></script>
   </body>
 </html>

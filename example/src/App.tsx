@@ -1,57 +1,23 @@
-import { useEffect, useState } from "react";
-import { createWorkerFactory, useWorkerMemo, useWorkerPromise } from "use-worker-promise";
+import { useState } from "react"
+import { UseWorkerPromiseDemo } from "./UseWorkerPromiseDemo";
+import { UseWorkerMemoDemo } from "./UseWorkerMemoDemo";
 
-const workerLoader = createWorkerFactory<typeof import("./worker")["worker"]>(
-  () => new Worker(new URL("./worker.ts", import.meta.url), { type: "module" })
-);
+const demos = {
+    UseWorkerMemoDemo,
+    UseWorkerPromiseDemo
+} as const
 
 export const App = () => {
-  return <>
-    <Demo1 />
-    <br />
-    <Demo2 />
-  </>
-}
-
-const Demo1 = () => {
-  const executeWorker = useWorkerPromise(workerLoader);
-  const [value, setValue] = useState("");
-  const [result, setResult] = useState("");
-  useEffect(() => {
-    let isRunning = true;
-    executeWorker(value).then((result) => {
-      if (!isRunning) {
-        return;
-      }
-      setResult(result)
-    });
-    return () => {
-      isRunning = false;
+    const [demo, setDemo] = useState<keyof typeof demos>();
+    if (demo) {
+        const Demo = demos[demo];
+        return <Demo />
     }
-  }, [value]);
-  return (
-    <>
-      <input
-        type="text"
-        value={value}
-        onChange={({ target }) => setValue(target.value)}
-      />
-      {result}
+    return <>
+        Choose a demo:
+        {(Object.keys(demos) as Array<keyof typeof demos>).map((demoName) => <div key={demoName}>
+            <button onClick={() => setDemo(demoName)}>{demoName}</button>
+        </div>)}
+       
     </>
-  );
-};
-
-const Demo2 = () => {
-  const [value, setValue] = useState("");
-  const workerResult = useWorkerMemo(workerLoader, value);
-  return (
-    <>
-      <input
-        type="text"
-        value={value}
-        onChange={({ target }) => setValue(target.value)}
-      />
-      {workerResult}
-    </>
-  );
-};
+}
