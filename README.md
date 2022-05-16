@@ -50,9 +50,12 @@ The only dependency is the very lightweight [promise-worker](https://www.npmjs.c
 
 `useWorkerPromise` and `useWorkerMemo` are fully typed and provides helpers to keep your worker typings in sync with your react application.
 
-## Example
+## Examples
 
-Try it live on [Glitch](https://glitch.com/edit/#!/zinc-acute-train)
+- slow worker demo on [Glitch](https://glitch.com/edit/#!/zinc-acute-train)
+- fuzzy worker search on [Glitch](https://glitch.com/edit/#!/fluffy-honored-gerbil)
+
+## Demo
 
 worker.ts
 ```tsx

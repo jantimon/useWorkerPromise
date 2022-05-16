@@ -1,6 +1,6 @@
 {
   "name": "use-worker-promise",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "A tiny and performant react hook for communicating with Web Workers",
   "keywords": [
     "web worker",

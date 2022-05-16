@@ -33,14 +33,68 @@ type UnwrapWorkerFunctionResult<TWorker extends any> = UnwrapWorkerFunctionLoade
  *  }
  * ```
  */
- export function useWorkerMemo<
- TArg extends any,
- TWorkerFunctionLoader extends
- | WorkerFunctionLoader<SingleArgmumentFunction<TArg, any>>
- | false
- | null
- | undefined
->(workerLoader: TWorkerFunctionLoader, input: TArg): undefined | UnwrapWorkerFunctionResult<TWorkerFunctionLoader>
+export function useWorkerMemo<
+  TArg,
+  TResult,
+  >(workerLoader: WorkerFunctionLoader<SingleArgmumentFunction<TArg, TResult>>, input: TArg): undefined | TResult
+/**
+ * useWorkerMemo uses a worker to computate a value and memorizes it
+ *
+ * If the worker argument is undefined / null the hook will wait for a valid loader
+ *
+ * @example
+ * ```tsx
+ *  const workerLoader = typeof window !== "undefined" && createWorkerFactory<import("./worker").MyWorker>(
+ *    () => new Worker(new URL('./worker.ts', import.meta.url))
+ *  );
+ *
+ *  const MyComponent = () => {
+ *    const calculatedValue = useWorkerMemo(workerLoader, 42);
+ *    return (
+ *      <span>{calculatedValue}</span>
+ *    );
+ *  }
+ * ```
+ */
+export function useWorkerMemo<
+  TArg,
+  TResult,
+  >(workerLoader: WorkerFunctionLoader<SingleArgmumentFunction<TArg, TResult>> | false
+    | null
+    | undefined, input: TArg): undefined | TResult | false
+  | null
+/**
+ * useWorkerMemo uses a worker to computate a value and memorizes it
+ *
+ * If the worker argument is undefined / null the hook will wait for a valid loader
+ * 
+ * The init argument will be passed to initialize the worker
+ *
+ * @example
+ * ```tsx
+ *  const workerLoader = typeof window !== "undefined" && createWorkerFactory<import("./worker").MyWorker>(
+ *    () => new Worker(new URL('./worker.ts', import.meta.url))
+ *  );
+ *
+ *  // The worker will be called with the given payload initialy
+ *  const workerConfig = { foo: 'baz' };
+ *  
+ *  const MyComponent = () => {
+ *    const calculatedValue = useWorkerMemo(workerLoader, 42, workerConfig);
+ *    return (
+ *      <span>{calculatedValue}</span>
+ *    );
+ *  }
+ * ```
+ */
+export function useWorkerMemo<
+  TArg,
+  TInit,
+  TResult,
+  >(workerLoader: WorkerFunctionLoader<SingleArgmumentFunction<TArg, TResult>> | false
+    | null
+    | undefined, input: TArg, init: TInit): undefined | TResult | false
+  | null
 /**
  * useWorkerMemo uses a worker to computate a value and memorizes it
  *
@@ -66,17 +120,16 @@ type UnwrapWorkerFunctionResult<TWorker extends any> = UnwrapWorkerFunctionLoade
  * ```
  */
 export function useWorkerMemo<
-  TArg extends any,
-  TInit extends any,
-  TWorkerFunctionLoader extends
-  | WorkerFunctionLoader<SingleArgmumentFunction<TArg | TInit, any>>
-  | false
+  TArg,
+  TInit,
+  TResult,
+  >(workerLoader: WorkerFunctionLoader<SingleArgmumentFunction<TArg | TInit, TResult>> | false
+    | null
+    | undefined, input: TArg, init: TInit): undefined | TResult | false
   | null
-  | undefined
->(workerLoader: TWorkerFunctionLoader, input: TArg, init: TInit): undefined | UnwrapWorkerFunctionResult<TWorkerFunctionLoader>
 export function useWorkerMemo<
-  TArg extends any,
-  TInit extends any,
+  TArg,
+  TInit,
   TWorkerFunctionLoader extends
   | WorkerFunctionLoader<SingleArgmumentFunction<TArg | TInit, any>>
   | false
