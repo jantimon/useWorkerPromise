@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import type {
   SingleArgmumentFunction,
   WorkerFunctionLoader,
-} from "./createWorkerFactory.mjs";
+} from "./createWorkerFactory";
 
 const workerMap = new WeakMap<
   SingleArgmumentFunction<any, any>,

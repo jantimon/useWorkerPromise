@@ -1,6 +1,5 @@
 node_modules
 package-lock.json
-/*.d.mts
-/*.mjs
-/register/*.d.mts
-/register/*.mjs
+.parcel-cache
+dist/
+register/
