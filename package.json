@@ -1,6 +1,6 @@
 {
   "name": "use-worker-promise",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "A tiny and performant react hook for communicating with Web Workers",
   "keywords": [
     "web worker",
@@ -21,13 +21,13 @@
   "sideEffects": false,
   "scripts": {
     "build": "parcel build && tsc -p tsconfig.build.json",
-    "prettier": "npx prettier src/*.mts --write",
-    "min": "npm run useWorkerPromise && npm run min:useWorkerMemo",
+    "prettier": "npx prettier src/*.ts --write",
+    "min": "npm run min:useWorkerPromise && npm run min:useWorkerMemo",
     "min:useWorkerPromise": "npx terser --compress --mangle --toplevel useWorkerPromise.mjs",
     "min:useWorkerMemo": "npx terser --compress --mangle --toplevel useWorkerMemo.mjs",
     "size": "npm run size:useWorkerPromise && npm run size:useWorkerMemo",
-    "size:useWorkerPromise": "npx terser --compress --mangle --toplevel useWorkerPromise.mjs | npx gzip-size",
-    "size:useWorkerMemo": "npx terser --compress --mangle --toplevel useWorkerMemo.mjs | npx gzip-size"
+    "size:useWorkerPromise": "npx terser --compress --mangle --toplevel dist/useWorkerPromise.js | npx gzip-size",
+    "size:useWorkerMemo": "npx terser --compress --mangle --toplevel dist/useWorkerMemo.js | npx gzip-size"
   },
   "files": [
     "dist/",

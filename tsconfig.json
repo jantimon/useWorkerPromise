@@ -100,6 +100,8 @@
   },
   "files": [
     "src/index.ts",
+    "src/useWorkerMemo.ts",
+    "src/useWorkerPromise.ts",
     "src/register/index.ts"
   ]
 }
