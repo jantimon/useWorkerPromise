@@ -159,7 +159,7 @@ export function useWorkerMemo<
     if (!workerLoader) return;
     const worker = workerLoader();
     const promiseWorker = new PromiseWorker(worker);
-    ref.r = ref.r || promiseWorker.postMessage.bind(promiseWorker) as Runner;
+    ref.r = ref.r || (promiseWorker.postMessage.bind(promiseWorker) as Runner);
     // Initialize the worker if the optional initialize arg was passed
     ref.p = NOOP_PROMISE.then(() => (init && ref.r ? ref.r(init) : NO_VALUE));
     return () => {
