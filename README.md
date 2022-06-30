@@ -26,16 +26,9 @@ yarn add use-worker-promise
 ## Zero Config
 
 Modern bundlers (Webpack, Vite, Parcel, ...) are capable of bundling Workers [out of the box](https://webpack.js.org/guides/web-workers/).  
-Therefore `useWorkerPromise` and `useWorkerMemo` require **no plugin or loader**.
+Therefore `useWorkerMemo` requires **no plugin or loader**.
 
 ## Size
-
-The `useWorkerPromise` hook minifies to [~300byte (min+gzip)](https://bundlejs.com/?q=use-worker-promise&treeshake=[{useWorkerPromise}]&config={%22esbuild%22:{%22external%22:[%22react%22,%22react-dom%22,%22promise-worker%22]}}): 
-
-```js
-const o=new WeakMap;
-function useWorkerPromise(n){const s=()=>n&&(t=>((t,r)=>{const n=o.get(t);if(n)return n;const s=r(),i=new e(s),c=[s,i.postMessage.bind(i)];return o.set(t,c),c})(i,n)[1](t)),[i,c]=r(s);return t((()=>c(s)),[n]),t((()=>()=>(e=>{const t=o.get(e);o.delete(e),t&&t[0].terminate()})(i)),[i]),i}
-```
 
 The `useWorkerMemo` hook minifies to [~300byte (min+gzip)](https://bundlejs.com/?q=use-worker-promise&treeshake=[{useWorkerMemo}]&config={%22esbuild%22:{%22external%22:[%22react%22,%22react-dom%22,%22promise-worker%22]}}):
 
@@ -48,14 +41,19 @@ The only dependency is the very lightweight [promise-worker](https://www.npmjs.c
 
 ## Types
 
-`useWorkerPromise` and `useWorkerMemo` are fully typed and provides helpers to keep your worker typings in sync with your react application.
+`useWorkerMemo` is fully typed and provides helpers to keep your worker typings in sync with your react application.
 
-## Examples
+## Online Examples
 
 - slow worker demo on [Glitch](https://glitch.com/edit/#!/zinc-acute-train)
 - fuzzy worker search on [Glitch](https://glitch.com/edit/#!/fluffy-honored-gerbil)
 
-## Demo
+## Usage
+
+`useWorkerMemo` lazyloads and boots `worker.ts` in a seperate webworker process.
+As soon as the worker is ready `useWorkerMemo` will execute the webworker with the given value.
+
+Until the first result is available `useWorkerMemo` will return `undefined`.
 
 worker.ts
 ```tsx
@@ -64,28 +62,6 @@ import { expose } from 'use-worker-promise/register';
 export const worker = expose(async (message: string) => {
   return message.toUpperCase();
 });
-```
-
-UseWorkerPromiseDemo.tsx
-```tsx
-import { useEffect, useState } from "react"
-import { createWorkerFactory, useWorkerPromise } from "use-worker-promise";
-
-const workerLoader = createWorkerFactory<import('./worker').worker>(
-  () => new Worker(new URL('./worker.ts', import.meta.url), { type: "module" })
-);
-
-export const UseWorkerPromiseDemo = () => {
-    const executeWorker = useWorkerPromise(workerLoader);
-
-    return <button onClick={async () => {
-        // This promise will be canceled on unmount automatically because of the worker termination:
-        const result = await executeWorker("foo");
-        console.log(result); // logs: "FOO"
-    }}>
-        run WebWorker
-    </button>
-}
 ```
 
 UseWorkerMemoDemo.tsx
@@ -113,9 +89,27 @@ export const UseWorkerMemoDemo = () => {
 }
 ```
 
+## Initialization
+
+`useWorkerMemo` has an optional third argument to initialize the webworker.
+
+The initialization value will be send to the worker once its booted.
+
+```tsx
+  // Changing the config argument will reboot the worker
+  // therefore you should ensure that its value won't change
+  // on every render
+  const config = useMemo(() => {
+    return {
+      foo: 'baz'
+    }
+  }, []);
+  useWorkerMemo(workerLoader, value, config);
+```
+
 ## SSR
 
-`useWorkerPromise` and `useWorkerMemo` support SSR in two different ways: `hybrid` and `browser only`.
+`useWorkerMemo` supports SSR in two different ways: `hybrid` and `browser only`.
 
 ### Run the worker in NodeJs
 
@@ -123,7 +117,7 @@ For SSR you can add the [web-worker](https://www.npmjs.com/package/web-worker) n
 
 ### Run the worker only in Browser
 
-`createWorkerFactory` allows to conditionally execture the WebWorker by returning a falsy workerLoader:
+`createWorkerFactory` allows to conditionally execute the WebWorker by returning a falsy workerLoader:
 
 ```tsx
 const workerLoader = typeof window !== "undefined" && 

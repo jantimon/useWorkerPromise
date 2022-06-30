@@ -1,4 +1,4 @@
-import { expose } from 'use-worker-promise/register/index.mjs';
+import { expose } from 'use-worker-promise/register';
 
 export const worker = expose(
     async (message: string) => {

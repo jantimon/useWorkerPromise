@@ -62,14 +62,16 @@ export function useWorkerMemo<TArg, TResult>(
  *  }
  * ```
  */
-export function useWorkerMemo<TArg, TResult>(
+export function useWorkerMemo<
+  TArg,
+  TResult,
+  TFalsy extends false | null | undefined
+>(
   workerLoader:
     | WorkerFunctionLoader<SingleArgmumentFunction<TArg, TResult>>
-    | false
-    | null
-    | undefined,
+    | TFalsy,
   input: TArg
-): undefined | TResult | false | null;
+): TResult | TFalsy | undefined;
 /**
  * useWorkerMemo uses a worker to computate a value and memorizes it
  *
@@ -95,14 +97,12 @@ export function useWorkerMemo<TArg, TResult>(
  * ```
  */
 export function useWorkerMemo<TArg, TInit, TResult>(
-  workerLoader:
-    | WorkerFunctionLoader<SingleArgmumentFunction<TArg, TResult>>
-    | false
-    | null
-    | undefined,
+  workerLoader: WorkerFunctionLoader<
+    SingleArgmumentFunction<TArg | TInit, TResult>
+  >,
   input: TArg,
   init: TInit
-): undefined | TResult | false | null;
+): undefined | TResult;
 /**
  * useWorkerMemo uses a worker to computate a value and memorizes it
  *
@@ -127,15 +127,18 @@ export function useWorkerMemo<TArg, TInit, TResult>(
  *  }
  * ```
  */
-export function useWorkerMemo<TArg, TInit, TResult>(
+export function useWorkerMemo<
+  TArg,
+  TInit,
+  TResult,
+  TFalsy extends false | null | undefined
+>(
   workerLoader:
     | WorkerFunctionLoader<SingleArgmumentFunction<TArg | TInit, TResult>>
-    | false
-    | null
-    | undefined,
+    | TFalsy,
   input: TArg,
   init: TInit
-): undefined | TResult | false | null;
+): undefined | TResult | TFalsy;
 export function useWorkerMemo<
   TArg,
   TInit,
