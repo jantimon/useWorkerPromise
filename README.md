@@ -1,6 +1,6 @@
 # useWorkerPromise
 
-A tiny and performant react hook for communicating with Web Workers. Post a message to the worker, get a message back. Wraps the tiny [promise-worker](https://www.npmjs.com/package/promise-worker) package.
+A tiny and performant react hook for communicating with Web Workers. Post a message to the worker, get a message back.
 
 ## Goals
 
@@ -10,6 +10,7 @@ A tiny and performant react hook for communicating with Web Workers. Post a mess
  - easy to use
  - support for ssr
  - support for concurrency mode
+ - zero dependency
 
 ## Installation
 
@@ -33,11 +34,8 @@ Therefore `useWorkerMemo` requires **no plugin or loader**.
 The `useWorkerMemo` hook minifies to [~300byte (min+gzip)](https://bundlejs.com/?q=use-worker-promise&treeshake=[{useWorkerMemo}]&config={%22esbuild%22:{%22external%22:[%22react%22,%22react-dom%22,%22promise-worker%22]}}):
 
 ```js
-const o={},n=Promise.resolve(o);
-function useWorkerMemo(s,i,p){const[m,c]=t(),[u]=t({p:n});return e((()=>{if(!s)return;const e=s(),t=new r(e);return u.r||(u.r=t.postMessage.bind(t)),u.p=n.then((()=>p&&u.r?u.r(p):o)),()=>{u.p=n,u.r=void 0,e.terminate()}}),[s,p]),e((()=>{const{r:r}=u;let e=!0;if(r)return u.p=u.p.then((r=>e&&u.r?r!==o&&c(r)||u.r(i).then((r=>e&&c(r)||r)):r)),()=>{e=!1}}),[i]),m}
+const s=e=>e;function a(s,a,o){const[n,c]=e(),u=t();return r((()=>{if(!s)return;let e=c;const t=s();t.onmessage=({data:t})=>e(t);let r=[u,u];return u.current=(...e)=>{t.postMessage(e.map(((e,t)=>e===r[t]||[e]))),r=e},()=>{e=()=>{},t.terminate()}}),[s,o]),r((()=>{const e=u.current;e&&e(a,o)}),[a,o]),n}export{s as createWorkerFactory,a as useWorkerMemo};
 ```
-
-The only dependency is the very lightweight [promise-worker](https://www.npmjs.com/package/promise-worker) package.
 
 ## Types
 
@@ -59,9 +57,9 @@ worker.ts
 ```tsx
 import { expose } from 'use-worker-promise/register';
 
-export const worker = expose(async (message: string) => {
-  return message.toUpperCase();
-});
+export const worker = expose(
+  (message: string) => message.toUpperCase()
+);
 ```
 
 UseWorkerMemoDemo.tsx
@@ -89,11 +87,25 @@ export const UseWorkerMemoDemo = () => {
 }
 ```
 
-## Initialization
+## Worker Initialization
 
 `useWorkerMemo` has an optional third argument to initialize the webworker.
 
-The initialization value will be send to the worker once its booted.
+The initialization value will be send only to the worker during boot.  
+Afterwards a cache from memory is used to guarantee reference equality.
+
+For example:
+
+worker.ts
+```tsx
+import { expose } from 'use-worker-promise/register';
+
+export const worker = expose(
+  (message: string, options: { prefix : string}) => {
+     return options.prefix + message.toUpperCase()
+  }
+);
+```
 
 ```tsx
   // Changing the config argument will reboot the worker
@@ -122,6 +134,6 @@ For SSR you can add the [web-worker](https://www.npmjs.com/package/web-worker) n
 ```tsx
 const workerLoader = typeof window !== "undefined" && 
   createWorkerFactory<WorkerFunction>(
-     () => new Worker(new URL('./worker.ts', import.meta.url))
+     () => new Worker(new URL('./worker.ts', import.meta.url), { type: "module" })
   );
 ```

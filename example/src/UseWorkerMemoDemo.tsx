@@ -10,12 +10,16 @@ const workerLoader = createWorkerFactory<typeof import("./worker")["worker"]>(
 
 export function UseWorkerMemoDemo() {
   const [value, setValue] = useState("");
-  const workerResult = useWorkerMemo(workerLoader, value);
+  const [value2, setValue2] = useState(4);
+  
+  const workerResult = useWorkerMemo(workerLoader, value, value2);
+
+
   return (
     <>
       <h1>use-worker-promise</h1>
       <br />
-      <label>
+      <label onClick={()=> setValue2(value2 + 1)}>
         Input:
       <input
         type="text"
