@@ -1,10 +1,8 @@
 import { useState } from "react"
-import { UseWorkerPromiseDemo } from "./UseWorkerPromiseDemo";
 import { UseWorkerMemoDemo } from "./UseWorkerMemoDemo";
 
 const demos = {
     UseWorkerMemoDemo,
-    UseWorkerPromiseDemo
 } as const
 
 export const App = () => {

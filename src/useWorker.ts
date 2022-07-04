@@ -1,13 +1,9 @@
-import PromiseWorker from "promise-worker";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type {
+  DoubleArgmumentFunction,
   SingleArgmumentFunction,
   WorkerFunctionLoader,
 } from "./createWorkerFactory";
-
-/** Unique NoValue Symbol */
-const NO_VALUE = {};
-const NOOP_PROMISE = Promise.resolve(NO_VALUE);
 
 type UnwrapWorkerFunctionLoader<TWorker extends any> =
   TWorker extends WorkerFunctionLoader<infer U> ? U : TWorker;
@@ -42,7 +38,7 @@ type UnwrapWorkerFunctionResult<TWorker extends any> =
 export function useWorkerMemo<TArg, TResult>(
   workerLoader: WorkerFunctionLoader<SingleArgmumentFunction<TArg, TResult>>,
   input: TArg
-): undefined | TResult;
+): undefined | Awaited<TResult>;
 /**
  * useWorkerMemo uses a worker to computate a value and memorizes it
  *
@@ -71,7 +67,7 @@ export function useWorkerMemo<
     | WorkerFunctionLoader<SingleArgmumentFunction<TArg, TResult>>
     | TFalsy,
   input: TArg
-): TResult | TFalsy | undefined;
+): Awaited<TResult> | TFalsy | undefined;
 /**
  * useWorkerMemo uses a worker to computate a value and memorizes it
  *
@@ -98,11 +94,11 @@ export function useWorkerMemo<
  */
 export function useWorkerMemo<TArg, TInit, TResult>(
   workerLoader: WorkerFunctionLoader<
-    SingleArgmumentFunction<TArg | TInit, TResult>
+    DoubleArgmumentFunction<TArg, TInit, TResult>
   >,
   input: TArg,
   init: TInit
-): undefined | TResult;
+): undefined | Awaited<TResult>;
 /**
  * useWorkerMemo uses a worker to computate a value and memorizes it
  *
@@ -134,16 +130,19 @@ export function useWorkerMemo<
   TFalsy extends false | null | undefined
 >(
   workerLoader:
-    | WorkerFunctionLoader<SingleArgmumentFunction<TArg | TInit, TResult>>
+    | WorkerFunctionLoader<DoubleArgmumentFunction<TArg, TInit, TResult>>
     | TFalsy,
   input: TArg,
   init: TInit
-): undefined | TResult | TFalsy;
+): undefined | Awaited<TResult> | TFalsy;
 export function useWorkerMemo<
   TArg,
   TInit,
   TWorkerFunctionLoader extends
-    | WorkerFunctionLoader<SingleArgmumentFunction<TArg | TInit, any>>
+    | WorkerFunctionLoader<
+        | SingleArgmumentFunction<TArg, any>
+        | DoubleArgmumentFunction<TArg, TInit, any>
+      >
     | false
     | null
     | undefined
@@ -152,50 +151,50 @@ export function useWorkerMemo<
   input: TArg,
   init?: TInit
 ): undefined | UnwrapWorkerFunctionResult<TWorkerFunctionLoader> {
-  type Runner = UnwrapWorkerFunctionLoader<TWorkerFunctionLoader>;
   const [result, setResult] = useState<
     undefined | UnwrapWorkerFunctionResult<TWorkerFunctionLoader>
   >();
-  const [ref] = useState<{ p: Promise<any>; r?: Runner }>({ p: NOOP_PROMISE });
+  const ref = useRef<null | ((input: TArg, init: TInit | undefined) => void)>();
   // Start and stop the worker:
   useEffect(() => {
     if (!workerLoader) return;
+    /**
+     * a reference to setResult which will be unset during cleanup
+     * to prevent updating the state after unmount
+     */
+    let setWorkerResult: (
+      value?: UnwrapWorkerFunctionResult<TWorkerFunctionLoader>
+    ) => void = setResult;
+    // Boot webworker
     const worker = workerLoader();
-    const promiseWorker = new PromiseWorker(worker);
-    ref.r = ref.r || (promiseWorker.postMessage.bind(promiseWorker) as Runner);
-    // Initialize the worker if the optional initialize arg was passed
-    ref.p = NOOP_PROMISE.then(() => (init && ref.r ? ref.r(init) : NO_VALUE));
+    worker.onmessage = ({ data }) => setWorkerResult(data);
+    // Abuse `ref` as unique id which will never match
+    // for the first equality check
+    let previousArgs: [input: TArg, init: TInit | undefined] = [
+      ref,
+      ref,
+    ] as any;
+    // create the worker bridge
+    ref.current = (...args) => {
+      worker.postMessage(
+        args.map((arg, i) => arg === previousArgs[i] || [arg])
+      );
+      previousArgs = args;
+    };
     return () => {
-      ref.p = NOOP_PROMISE;
-      ref.r = undefined;
+      // turn set state into a noop as this
+      // effect is no longer running
+      setWorkerResult = () => {};
       worker.terminate();
     };
   }, [workerLoader, init]);
-  // Run the worker
+
   useEffect(() => {
-    const { r: promiseWorker } = ref;
-    let isActive = true;
-    if (!promiseWorker) return;
-    // A worker is single threaded and takes time to boot up
-    // this queue will throttle the input values to ensure that
-    // only the latest input is send to the worker
-    ref.p = ref.p.then((previousResult): any =>
-      // Verify that the component is still mounted
-      // Verify that the value hasn't changed
-      !isActive || !ref.r
-        ? previousResult
-        : // Set the previous result while calculating the next value
-          (previousResult !== NO_VALUE && setResult(previousResult)) ||
-          // Start computation
-          ref.r(input).then(
-            (result) =>
-              // Verify that the component is still mounted
-              (isActive && setResult(result)) || result
-          )
-    );
-    return () => {
-      isActive = false;
-    };
-  }, [input]);
+    const fn = ref.current;
+    if (fn) {
+      fn(input, init);
+    }
+  }, [input, init]);
+
   return result;
 }
