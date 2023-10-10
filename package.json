@@ -1,30 +1,36 @@
 {
   "name": "use-worker-promise",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "A tiny and performant react hook for communicating with Web Workers",
   "keywords": [
     "web worker",
     "react",
     "hooks"
   ],
-  "source": "src/index.ts",
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
-  "types": "dist/index.d.ts",
+  "main": "./dist/client/index.js",
+  "module": "./dist/client/index.mjs",
+  "types": "./dist/client/index.d.ts",
   "exports": {
     ".": {
-      "require": "./dist/index.js",
-      "import": "./dist/index.mjs"
+      "types": "./dist/client/index.d.ts",
+      "require": "./dist/client/index.js",
+      "import": "./dist/client/index.mjs"
     },
-    "./register": "./register/index.js"
+    "./register": {
+      "types": "./dist/worker/index.d.ts",
+      "require": "./dist/worker/index.js",
+      "import": "./dist/worker/index.mjs"
+    }
   },
   "sideEffects": false,
   "scripts": {
     "prepublishOnly": "npm run prettier; npm run build; npm run min; npm run size",
-    "build": "parcel build && tsc -p tsconfig.build.json",
+    "build": "npm run build:check && npm run build:client && npm run build:worker",
+    "build:check": "tsc -p tsconfig.build.json --noEmit",
+    "build:client": "tsup --out-dir dist/client --format cjs,esm --dts --clean --minify --target es2022 --external react src/index.ts",
+    "build:worker": "tsup --out-dir dist/worker --format cjs,esm --dts --clean --minify --target es2022 src/register/index.ts",
     "prettier": "npx prettier src/*.ts --write",
-    "min": "npx terser --compress --mangle --toplevel dist/index.mjs",
-    "size": "npx terser --compress --mangle --toplevel dist/index.js | npx gzip-size"
+    "size": "npx terser --compress --mangle --toplevel dist/index.js | npx gzip-size-cli"
   },
   "files": [
     "dist/",
@@ -43,11 +49,9 @@
     "react": "*"
   },
   "devDependencies": {
-    "@parcel/packager-ts": "^2.5.0",
-    "@parcel/transformer-typescript-types": "^2.5.0",
+    "tsup": "7.2.0",
     "@types/react": "18.0.9",
     "gzip-size-cli": "^5.1.0",
-    "parcel": "^2.5.0",
     "react": "18.1.0",
     "terser": "^5.13.1",
     "typescript": "^4.5.4"
