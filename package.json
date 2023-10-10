@@ -1,25 +1,25 @@
 {
   "name": "use-worker-promise",
-  "version": "1.5.0",
+  "version": "2.1.0",
   "description": "A tiny and performant react hook for communicating with Web Workers",
   "keywords": [
     "web worker",
     "react",
     "hooks"
   ],
-  "main": "./dist/client/index.js",
-  "module": "./dist/client/index.mjs",
-  "types": "./dist/client/index.d.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/client/index.d.ts",
-      "require": "./dist/client/index.js",
-      "import": "./dist/client/index.mjs"
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs"
     },
     "./register": {
-      "types": "./dist/worker/index.d.ts",
-      "require": "./dist/worker/index.js",
-      "import": "./dist/worker/index.mjs"
+      "types": "./register/index.d.ts",
+      "require": "./register/index.js",
+      "import": "./register/index.mjs"
     }
   },
   "sideEffects": false,
@@ -27,8 +27,8 @@
     "prepublishOnly": "npm run prettier; npm run build; npm run min; npm run size",
     "build": "npm run build:check && npm run build:client && npm run build:worker",
     "build:check": "tsc -p tsconfig.build.json --noEmit",
-    "build:client": "tsup --out-dir dist/client --format cjs,esm --dts --clean --minify --target es2022 --external react src/index.ts",
-    "build:worker": "tsup --out-dir dist/worker --format cjs,esm --dts --clean --minify --target es2022 src/register/index.ts",
+    "build:client": "tsup --out-dir dist/ --format cjs,esm --dts --clean --minify --target es2022 --external react src/index.ts",
+    "build:worker": "tsup --out-dir register/ --format cjs,esm --dts --clean --minify --target es2022 src/register/index.ts",
     "prettier": "npx prettier src/*.ts --write",
     "size": "npx terser --compress --mangle --toplevel dist/index.js | npx gzip-size-cli"
   },
