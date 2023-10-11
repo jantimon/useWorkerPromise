@@ -1,6 +1,6 @@
 {
   "name": "use-worker-promise",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "A tiny and performant react hook for communicating with Web Workers",
   "keywords": [
     "web worker",
@@ -12,14 +12,24 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "require": "./dist/index.js",
-      "import": "./dist/index.mjs"
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
     },
     "./register": {
-      "types": "./register/index.d.ts",
-      "require": "./register/index.js",
-      "import": "./register/index.mjs"
+      "import": {
+        "types": "./register/index.d.mts",
+        "default": "./register/index.mjs"
+      },
+      "require": {
+        "types": "./register/index.d.ts",
+        "default": "./register/index.js"
+      }
     }
   },
   "sideEffects": false,
